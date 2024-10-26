@@ -11,6 +11,7 @@ import { Pencil, Trash2, PlusCircle, History, FileText, DollarSign } from 'lucid
 import { Textarea } from "@/components/ui/textarea";
 import { v4 as uuidv4 } from 'uuid';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import DentalChart from '@/components/DentalChart';
 
 type BillItem = {
   id: number;
@@ -33,6 +34,11 @@ type CheckupResult = {
   notes: string;
 };
 
+type ToothData = {
+  id: number;
+  status: 'healthy' | 'decayed' | 'filled' | 'missing';
+};
+
 type Patient = {
   id: string;
   name: string;
@@ -45,6 +51,7 @@ type Patient = {
   billHistory: BillItem[];
   paymentHistory: PaymentItem[];
   checkupHistory: CheckupResult[];
+  dentalChart: ToothData[];
 };
 
 const ClinicManagementPage = () => {
@@ -67,7 +74,8 @@ const ClinicManagementPage = () => {
       ],
       checkupHistory: [
         { id: 1, date: '2023-05-01', diagnosis: 'Common cold', treatment: 'Rest and fluids', notes: 'Patient advised to return if symptoms worsen' }
-      ]
+      ],
+      dentalChart: Array.from({ length: 32 }, (_, i) => ({ id: i + 1, status: 'healthy' })),
     },
     { 
       id: uuidv4(),
@@ -86,7 +94,8 @@ const ClinicManagementPage = () => {
       ],
       checkupHistory: [
         { id: 1, date: '2023-05-02', diagnosis: 'Grade 1 ankle sprain', treatment: 'RICE method', notes: 'Follow-up in 1 week' }
-      ]
+      ],
+      dentalChart: Array.from({ length: 32 }, (_, i) => ({ id: i + 1, status: 'healthy' })),
     },
   ]);
   const [newPatient, setNewPatient] = useState({ 
@@ -125,6 +134,12 @@ const ClinicManagementPage = () => {
   // Add this new state for managing the patient info dialog
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
+  // Add this new state for managing the dental chart
+  const [editingDentalChart, setEditingDentalChart] = useState<ToothData[]>([]);
+
+  // Add this new state for managing the dental chart dialog
+  const [isDentalChartDialogOpen, setIsDentalChartDialogOpen] = useState(false);
+
   const calculateAge = (dateOfBirth: string): number => {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
@@ -152,7 +167,8 @@ const ClinicManagementPage = () => {
         { id: 1, amount: newBillAmount, details: 'Initial bill', date: new Date().toISOString().split('T')[0] }
       ],
       paymentHistory: [],
-      checkupHistory: []
+      checkupHistory: [],
+      dentalChart: Array.from({ length: 32 }, (_, i) => ({ id: i + 1, status: 'healthy' })),
     }]);
     setNewPatient({ name: '', dateOfBirth: '', contactNumber: '', email: '', nextVisitDate: '', billAmount: '' });
   };
@@ -315,6 +331,51 @@ const ClinicManagementPage = () => {
   // Add this new function to open the patient info dialog
   const openPatientInfoDialog = (patient: Patient) => {
     setSelectedPatient(patient);
+    setEditingDentalChart(patient.dentalChart);
+  };
+
+  // Add this function to handle tooth status changes
+  const handleToothClick = (toothId: number) => {
+    setEditingDentalChart((prev) =>
+      prev.map((tooth) =>
+        tooth.id === toothId
+          ? {
+              ...tooth,
+              status:
+                tooth.status === 'healthy'
+                  ? 'decayed'
+                  : tooth.status === 'decayed'
+                  ? 'filled'
+                  : tooth.status === 'filled'
+                  ? 'missing'
+                  : 'healthy',
+            }
+          : tooth
+      )
+    );
+  };
+
+  // Update the saveDentalChartChanges function
+  const saveDentalChartChanges = () => {
+    if (selectedPatient) {
+      setPatients((prevPatients) =>
+        prevPatients.map((p) =>
+          p.id === selectedPatient.id
+            ? { ...p, dentalChart: editingDentalChart }
+            : p
+        )
+      );
+      setSelectedPatient((prev) =>
+        prev ? { ...prev, dentalChart: editingDentalChart } : null
+      );
+    }
+  };
+
+  // Add this new function to open the dental chart dialog
+  const openDentalChartDialog = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setEditingDentalChart(patient.dentalChart);
+    setIsDentalChartDialogOpen(true);
   };
 
   return (
@@ -599,6 +660,13 @@ const ClinicManagementPage = () => {
                             </Button>
                           </DialogTrigger>
                         </Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDentalChartDialog(patient)}
+                        >
+                          Dental Chart
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -791,33 +859,20 @@ const ClinicManagementPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add this new Dialog component at the end of your return statement, just before the closing </div> */}
-      <Dialog open={!!selectedPatient} onOpenChange={() => setSelectedPatient(null)}>
+      {/* Add this new Dialog for the dental chart */}
+      <Dialog open={isDentalChartDialogOpen} onOpenChange={setIsDentalChartDialogOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Patient Information</DialogTitle>
+            <DialogTitle>Dental Chart for {selectedPatient?.name}</DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[80vh]">
             {selectedPatient && (
               <div className="space-y-4">
-                <div>
-                  <strong>ID:</strong> {selectedPatient.id}
-                </div>
-                <div>
-                  <strong>Name:</strong> {selectedPatient.name}
-                </div>
-                <div>
-                  <strong>Date of Birth:</strong> {selectedPatient.dateOfBirth}
-                </div>
-                <div>
-                  <strong>Age:</strong> {calculateAge(selectedPatient.dateOfBirth)}
-                </div>
-                <div>
-                  <strong>Contact Number:</strong> {selectedPatient.contactNumber}
-                </div>
-                <div>
-                  <strong>Email:</strong> {selectedPatient.email}
-                </div>
+                <DentalChart
+                  teethData={editingDentalChart}
+                  onToothClick={handleToothClick}
+                />
+                <Button onClick={saveDentalChartChanges}>Save Dental Chart</Button>
               </div>
             )}
           </ScrollArea>
