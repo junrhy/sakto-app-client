@@ -20,7 +20,8 @@
     "paths": {
       "@/*": ["./*"],
       "@supabase/auth-helpers-nextjs": ["./node_modules/@supabase/auth-helpers-nextjs"]
-    }
+    },
+    "types": ["uuid", "ws"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

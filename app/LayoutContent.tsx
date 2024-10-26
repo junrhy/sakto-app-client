@@ -1,11 +1,11 @@
 'use client'
 
-import { useNavigation } from '@/contexts/NavigationContext'
+import { useApp } from '@/contexts/AppContext'
 import { useEffect } from 'react'
 import NavigationBar from '@/components/NavigationBar'
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { theme } = useNavigation()
+  const { theme } = useApp()
 
   useEffect(() => {
     const root = window.document.documentElement

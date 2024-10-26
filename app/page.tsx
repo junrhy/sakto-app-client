@@ -78,31 +78,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   checkUser();
-  // }, []);
-
   useEffect(() => {
-    // if (user) {
       fetchWidgets();
+      checkUser();
       setLoading(false);
-    // }
   }, []);
 
-  // const checkUser = async () => {
-  //   const { data: { user } } = await supabase.auth.getUser();
-  //   setUser(user);
-  //   setLoading(false);
-  // };
-
-  // const handleLogin = () => {
-  //   checkUser();
-  // };
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setWidgets([]);
+    navigate(0);
   };
 
   const fetchWidgets = async () => {
@@ -196,35 +187,19 @@ export default function Home() {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-8">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Log in to Your Dashboard</CardTitle>
-          </CardHeader>
-          <CardContent>
-
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
-
-  useEffect(() => {
-    navigate('/dashboard');
-  }, [navigate]);
-
   return (
     <main className="flex min-h-screen flex-col items-center p-8">
       <div className="w-full max-w-7xl flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Welcome to Your Dashboard</h1>
-        <Button onClick={handleLogout}>Log out</Button>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="flex items-center space-x-4">
+          {user && <span>Welcome, {user.email}</span>}
+          <Button onClick={handleLogout}>Log out</Button>
+        </div>
       </div>
       
-      <div className="w-full max-w-7xl mb-8">
+      <div className="w-full flex justify-between max-w-7xl mb-8">
         <div className="flex space-x-4 mb-4">
-          <Select value={selectedWidgetType || ""} onValueChange={(value) => setSelectedWidgetType(value as WidgetType)}>
+          <Select value={selectedWidgetType || ""} onValueChange={(value: string) => setSelectedWidgetType(value as WidgetType)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select widget" />
             </SelectTrigger>
@@ -235,18 +210,18 @@ export default function Home() {
             </SelectContent>
           </Select>
           <Button onClick={addWidget} disabled={!selectedWidgetType}>
-            <Plus className="mr-2 h-4 w-4" /> Add Widget
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
         <div className="flex space-x-2">
           <Button onClick={() => setColumnCount(1)} variant={columnCount === 1 ? "default" : "outline"}>
-            <LayoutGrid className="mr-2 h-4 w-4" /> One Column
+            <LayoutGrid className="h-4 w-4" />
           </Button>
           <Button onClick={() => setColumnCount(2)} variant={columnCount === 2 ? "default" : "outline"}>
-            <Columns className="mr-2 h-4 w-4" /> Two Columns
+            <Columns className="h-4 w-4" />
           </Button>
           <Button onClick={() => setColumnCount(3)} variant={columnCount === 3 ? "default" : "outline"}>
-            <Columns3 className="mr-2 h-4 w-4" /> Three Columns
+            <Columns3 className="h-4 w-4" />
           </Button>
         </div>
       </div>

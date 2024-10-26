@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useNavigation } from '@/contexts/NavigationContext';
+import { useApp } from '@/contexts/AppContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Color = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
@@ -16,6 +17,9 @@ export default function Settings() {
   const { 
     navigationItems, 
     updateNavigationItem, 
+  } = useNavigation();
+
+  const {  
     currency, 
     setCurrency, 
     appName, 
@@ -24,7 +28,7 @@ export default function Settings() {
     setTheme,
     color,
     setColor
-  } = useNavigation();
+  } = useApp();
   
   const [newAppName, setNewAppName] = useState(appName);
   const [newCurrency, setNewCurrency] = useState(currency);
