@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 
 type ToothStatus = 'healthy' | 'decayed' | 'filled' | 'missing';
@@ -24,10 +24,10 @@ const DentalChart: React.FC<DentalChartProps> = ({ teethData, onToothClick }) =>
     }
   };
 
-  const upperTeeth = teethData.slice(0, 16);
-  const lowerTeeth = teethData.slice(16);
+  const upperTeeth = useMemo(() => teethData.slice(0, 16), [teethData]);
+  const lowerTeeth = useMemo(() => teethData.slice(16), [teethData]);
 
-  const renderToothRow = (teeth: ToothData[], isUpper: boolean) => (
+  const renderToothRow = useMemo(() => (teeth: ToothData[], isUpper: boolean) => (
     <div className="flex justify-center space-x-1">
       {teeth.map((tooth, index) => {
         const toothNumber = isUpper ? 16 - index : index + 17;
@@ -51,9 +51,9 @@ const DentalChart: React.FC<DentalChartProps> = ({ teethData, onToothClick }) =>
         );
       })}
     </div>
-  );
+  ), [onToothClick]);
 
-  const renderLegend = () => (
+  const renderLegend = useMemo(() => () => (
     <div className="flex justify-center space-x-4 mt-4">
       {(['healthy', 'decayed', 'filled', 'missing'] as ToothStatus[]).map((status) => (
         <div key={status} className="flex items-center">
@@ -68,7 +68,7 @@ const DentalChart: React.FC<DentalChartProps> = ({ teethData, onToothClick }) =>
         </div>
       ))}
     </div>
-  );
+  ), []);
 
   return (
     <div className="space-y-4">
