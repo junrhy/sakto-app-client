@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,8 @@ export default function Settings() {
   
   const [newAppName, setNewAppName] = useState(appName);
   const [newCurrency, setNewCurrency] = useState(currency);
+  const [newTheme, setNewTheme] = useState(theme);
+  const [newColor, setNewColor] = useState(color);
 
   const handleAppNameChange = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +45,22 @@ export default function Settings() {
     updateNavigationItem(id, enabled);
   };
 
+  const handleThemeUpdate = () => {
+    setTheme(newTheme);
+  };
+
+  const handleColorUpdate = () => {
+    setColor(newColor);
+  };
+
   const colors: Color[] = ['zinc', 'slate', 'stone', 'gray', 'neutral', 'red', 'rose', 'orange', 'green', 'blue', 'yellow', 'violet'];
+
+  useEffect(() => {
+    setNewAppName(appName);
+    setNewCurrency(currency);
+    setNewTheme(theme);
+    setNewColor(color);
+  }, [appName, currency, theme, color]);
 
   return (
     <div className="p-8">
@@ -96,8 +113,8 @@ export default function Settings() {
             </CardHeader>
             <CardContent>
               <RadioGroup 
-                value={theme} 
-                onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}
+                value={newTheme} 
+                onValueChange={(value) => setNewTheme(value as 'light' | 'dark' | 'system')}
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="light" id="light" />
@@ -112,6 +129,7 @@ export default function Settings() {
                   <Label htmlFor="system">System</Label>
                 </div>
               </RadioGroup>
+              <Button onClick={handleThemeUpdate} className="mt-4">Update Theme</Button>
             </CardContent>
           </Card>
         </div>
@@ -160,14 +178,15 @@ export default function Settings() {
               {colors.map((c) => (
                 <Button
                   key={c}
-                  className={`w-full h-12 ${color === c ? 'ring-2 ring-offset-2 ring-offset-background' : ''}`}
+                  className={`w-full h-12 ${newColor === c ? 'ring-2 ring-offset-2 ring-offset-background' : ''}`}
                   style={{ backgroundColor: `hsl(var(--${c}-500))` }}
-                  onClick={() => setColor(c)}
+                  onClick={() => setNewColor(c)}
                 >
                   {c}
                 </Button>
               ))}
             </div>
+            <Button onClick={handleColorUpdate} className="mt-4">Update Color</Button>
           </CardContent>
         </Card>
       </div>
