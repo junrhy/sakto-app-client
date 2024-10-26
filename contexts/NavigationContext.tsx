@@ -10,6 +10,8 @@ type NavigationItem = {
 
 type Theme = 'light' | 'dark' | 'system';
 
+type Color = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
+
 type NavigationContextType = {
   currency: string;
   setCurrency: (currency: string) => void;
@@ -19,6 +21,8 @@ type NavigationContextType = {
   setAppName: (name: string) => void;
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  color: Color;
+  setColor: (color: Color) => void;
 };
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -43,6 +47,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     { id: '5', name: 'Restaurant POS', path: '/restaurant-pos', enabled: true },
     { id: '6', name: 'Settings', path: '/settings', enabled: true },
   ]);
+  const [color, setColor] = useState<Color>('zinc');
 
   const updateNavigationItem = (id: string, enabled: boolean) => {
     setNavigationItems(prevItems =>
@@ -61,7 +66,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       appName, 
       setAppName,
       theme,
-      setTheme
+      setTheme,
+      color,
+      setColor
     }}>
       {children}
     </NavigationContext.Provider>

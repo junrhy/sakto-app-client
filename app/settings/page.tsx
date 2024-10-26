@@ -6,18 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useNavigation } from '@/contexts/NavigationContext';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useNavigation } from '@/contexts/NavigationContext';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+type Color = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
 
 export default function Settings() {
   const { 
@@ -28,7 +21,9 @@ export default function Settings() {
     appName, 
     setAppName,
     theme,
-    setTheme
+    setTheme,
+    color,
+    setColor
   } = useNavigation();
   
   const [newAppName, setNewAppName] = useState(appName);
@@ -47,6 +42,8 @@ export default function Settings() {
   const handleToggleNavigationItem = (id: string, enabled: boolean) => {
     updateNavigationItem(id, enabled);
   };
+
+  const colors: Color[] = ['zinc', 'slate', 'stone', 'gray', 'neutral', 'red', 'rose', 'orange', 'green', 'blue', 'yellow', 'violet'];
 
   return (
     <div className="p-8">
@@ -153,6 +150,26 @@ export default function Settings() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Color Settings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-2">
+              {colors.map((c) => (
+                <Button
+                  key={c}
+                  className={`w-full h-12 ${color === c ? 'ring-2 ring-offset-2 ring-offset-background' : ''}`}
+                  style={{ backgroundColor: `hsl(var(--${c}-500))` }}
+                  onClick={() => setColor(c)}
+                >
+                  {c}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
