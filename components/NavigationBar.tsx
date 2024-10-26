@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, CreditCard, ShoppingCart, User, HelpCircle, ChevronDown, LogOut } from 'lucide-react';
+import { Menu, X, Home, CreditCard, ShoppingCart, User, HelpCircle, ChevronDown, LogOut, Package, DollarSign, Building } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,18 +12,12 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { useNavigation } from '@/contexts/NavigationContext';
 
 const NavigationBar = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const navItems = [
-    { name: 'Home', path: '/', icon: Home },
-    { name: 'Restaurant POS', path: '/restaurant-pos', icon: CreditCard },
-    { name: 'POS', path: '/pos', icon: CreditCard },
-    { name: 'Inventory', path: '/inventory', icon: ShoppingCart },
-    { name: 'Help', path: '/help', icon: HelpCircle },
-  ];
+  const { navigationItems } = useNavigation();
 
   const accountItems = [
     { name: 'Profile', path: '/profile', icon: User },
@@ -55,7 +49,7 @@ const NavigationBar = () => {
 
         {/* Desktop menu */}
         <ul className="hidden md:flex space-x-4 items-center ml-auto">
-          {navItems.map((item) => (
+          {navigationItems.filter(item => item.enabled).map((item) => (
             <li key={item.name}>
               <Link
                 href={item.path}
@@ -65,7 +59,6 @@ const NavigationBar = () => {
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
                 }`}
               >
-                <item.icon className="h-4 w-4 mr-2" />
                 {item.name}
               </Link>
             </li>
@@ -101,7 +94,7 @@ const NavigationBar = () => {
       {isMenuOpen && (
         <div className="md:hidden mt-4">
           <ul className="flex flex-col space-y-2">
-            {navItems.map((item) => (
+            {navigationItems.filter(item => item.enabled).map((item) => (
               <li key={item.name}>
                 <Link
                   href={item.path}
@@ -112,7 +105,6 @@ const NavigationBar = () => {
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <item.icon className="h-5 w-5 mr-2" />
                   {item.name}
                 </Link>
               </li>

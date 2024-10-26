@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Printer, Plus, Minus, Maximize, Minimize, Edit, Trash } from "lucide-react";
+import { Printer, Plus, Minus, Maximize, Minimize, Edit, Trash, Search } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MenuItem {
   id: number;
@@ -86,6 +87,10 @@ export default function RestaurantPOS() {
   const [isMenuItemDialogOpen, setIsMenuItemDialogOpen] = useState(false);
   const [currentMenuItem, setCurrentMenuItem] = useState<MenuItem | null>(null);
   const [newMenuItemImage, setNewMenuItemImage] = useState<File | null>(null);
+  const [selectedMenuItems, setSelectedMenuItems] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const addItemToOrder = (item: MenuItem) => {
     const existingItem = orderItems.find(orderItem => orderItem.id === item.id);
@@ -138,10 +143,6 @@ export default function RestaurantPOS() {
       table.name === tableNumber ? { ...table, status: 'available' } : table
     ));
   };
-
-  const filteredMenuItems = selectedCategory
-    ? MENU_ITEMS.filter(item => item.category === selectedCategory)
-    : MENU_ITEMS;
 
   const handleSplitBill = () => {
     setIsSplitBillDialogOpen(true);
@@ -253,6 +254,12 @@ export default function RestaurantPOS() {
 
   const handleDeleteMenuItem = (id: number) => {
     setMenuItems(menuItems.filter(item => item.id !== id));
+    setSelectedMenuItems(selectedMenuItems.filter(itemId => itemId !== id));
+  };
+
+  const handleDeleteSelectedMenuItems = () => {
+    setMenuItems(menuItems.filter(item => !selectedMenuItems.includes(item.id)));
+    setSelectedMenuItems([]);
   };
 
   const handleSaveMenuItem = (e: React.FormEvent) => {
@@ -278,6 +285,32 @@ export default function RestaurantPOS() {
       setNewMenuItemImage(e.target.files[0]);
     }
   };
+
+  const toggleMenuItemSelection = (id: number) => {
+    setSelectedMenuItems(prev =>
+      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
+    );
+  };
+
+  const categoryFilteredMenuItems = useMemo(() => {
+    return selectedCategory
+      ? MENU_ITEMS.filter(item => item.category === selectedCategory)
+      : MENU_ITEMS;
+  }, [MENU_ITEMS, selectedCategory]);
+
+  const filteredMenuItems = useMemo(() => {
+    return menuItems.filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [menuItems, searchTerm]);
+
+  const paginatedMenuItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredMenuItems.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredMenuItems, currentPage]);
+
+  const pageCount = Math.ceil(filteredMenuItems.length / itemsPerPage);
 
   return (
     <div className="p-8" ref={fullscreenRef}>
@@ -315,7 +348,7 @@ export default function RestaurantPOS() {
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {filteredMenuItems.map((item) => (
+                  {categoryFilteredMenuItems.map((item) => (
                     <Button
                       key={item.id}
                       onClick={() => addItemToOrder(item)}
@@ -566,12 +599,45 @@ export default function RestaurantPOS() {
               <CardTitle>Menu Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button onClick={handleAddMenuItem} className="mb-4">
-                <Plus className="mr-2 h-4 w-4" /> Add Menu Item
-              </Button>
+              <div className="flex justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Button onClick={handleAddMenuItem}>
+                    <Plus className="mr-2 h-4 w-4" /> Add Menu Item
+                  </Button>
+                  <Button 
+                    onClick={handleDeleteSelectedMenuItems} 
+                    variant="destructive" 
+                    disabled={selectedMenuItems.length === 0}
+                  >
+                    <Trash className="mr-2 h-4 w-4" /> Delete Selected
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Search className="h-4 w-4 text-gray-500" />
+                  <Input
+                    placeholder="Search menu items..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-64"
+                  />
+                </div>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        checked={selectedMenuItems.length === paginatedMenuItems.length}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedMenuItems(paginatedMenuItems.map(item => item.id));
+                          } else {
+                            setSelectedMenuItems([]);
+                          }
+                        }}
+                      />
+                    </TableHead>
+                    <TableHead>Image</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
@@ -579,8 +645,23 @@ export default function RestaurantPOS() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {menuItems.map((item) => (
+                  {paginatedMenuItems.map((item) => (
                     <TableRow key={item.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedMenuItems.includes(item.id)}
+                          onCheckedChange={() => toggleMenuItemSelection(item.id)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Image 
+                          src={item.image} 
+                          alt={item.name} 
+                          width={50} 
+                          height={50} 
+                          className="rounded-md object-cover"
+                        />
+                      </TableCell>
                       <TableCell>{item.name}</TableCell>
                       <TableCell>{item.category}</TableCell>
                       <TableCell>${item.price.toFixed(2)}</TableCell>
@@ -596,6 +677,34 @@ export default function RestaurantPOS() {
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex justify-between items-center mt-4">
+                <div>
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredMenuItems.length)} of {filteredMenuItems.length} items
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  {Array.from({ length: pageCount }, (_, i) => i + 1).map(page => (
+                    <Button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      variant={currentPage === page ? "default" : "outline"}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, pageCount))}
+                    disabled={currentPage === pageCount}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

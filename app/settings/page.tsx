@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useNavigation } from '@/contexts/NavigationContext';
 
 export default function Settings() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -21,6 +24,7 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const { navigationItems, updateNavigationItem } = useNavigation();
 
   const handleDeleteAccount = () => {
     // Implement account deletion logic here
@@ -37,14 +41,15 @@ export default function Settings() {
       return;
     }
 
-    // Here you would typically send a request to your backend to change the password
-    // For this example, we'll just log to the console
-    console.log("Password change requested", { currentPassword, newPassword });
-
-    // Reset form fields
+    // Implement password change logic here
+    console.log("Password changed");
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
+  };
+
+  const handleToggleNavigationItem = (id: number, enabled: boolean) => {
+    updateNavigationItem(id, enabled);
   };
 
   return (
@@ -90,6 +95,39 @@ export default function Settings() {
               {passwordError && <p className="text-red-500">{passwordError}</p>}
               <Button type="submit">Change Password</Button>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Navigation Items Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item Name</TableHead>
+                  <TableHead>Path</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {navigationItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.path}</TableCell>
+                    <TableCell>{item.enabled ? 'Enabled' : 'Disabled'}</TableCell>
+                    <TableCell>
+                      <Checkbox
+                        checked={item.enabled}
+                        onCheckedChange={(checked) => handleToggleNavigationItem(item.id, checked as boolean)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
