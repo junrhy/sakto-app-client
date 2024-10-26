@@ -2,11 +2,12 @@
 
 import './globals.css'
 import { Inter } from 'next/font/google'
-import NavigationBar from '@/components/NavigationBar'
-import { NavigationProvider, useNavigation } from '@/contexts/NavigationContext'
-import { useEffect } from 'react'
+import { NavigationProvider } from '@/contexts/NavigationContext'
+import dynamic from 'next/dynamic'
 
 const inter = Inter({ subsets: ['latin'] })
+
+const LayoutContent = dynamic(() => import('./LayoutContent'), { ssr: false })
 
 export default function RootLayout({
   children,
@@ -14,31 +15,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <NavigationProvider>
-      <LayoutContent>{children}</LayoutContent>
-    </NavigationProvider>
-  )
-}
-
-function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { theme } = useNavigation()
-
-  useEffect(() => {
-    const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      root.classList.add(systemTheme)
-    } else {
-      root.classList.add(theme)
-    }
-  }, [theme])
-
-  return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <NavigationBar />
-        {children}
+        <NavigationProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </NavigationProvider>
       </body>
     </html>
   )
