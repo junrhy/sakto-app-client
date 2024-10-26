@@ -8,6 +8,8 @@ type NavigationItem = {
   enabled: boolean;
 };
 
+type Theme = 'light' | 'dark' | 'system';
+
 type NavigationContextType = {
   currency: string;
   setCurrency: (currency: string) => void;
@@ -15,6 +17,8 @@ type NavigationContextType = {
   updateNavigationItem: (id: string, enabled: boolean) => void;
   appName: string;
   setAppName: (name: string) => void;
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 };
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -30,6 +34,7 @@ export const useNavigation = () => {
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currency, setCurrency] = useState('$');
   const [appName, setAppName] = useState('Your App Name');
+  const [theme, setTheme] = useState<Theme>('system');
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([
     { id: '1', name: 'Dashboard', path: '/', enabled: true },
     { id: '2', name: 'Clinic Management', path: '/clinic-management', enabled: true },
@@ -48,7 +53,16 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   return (
-    <NavigationContext.Provider value={{ currency, setCurrency, navigationItems, updateNavigationItem, appName, setAppName }}>
+    <NavigationContext.Provider value={{ 
+      currency, 
+      setCurrency, 
+      navigationItems, 
+      updateNavigationItem, 
+      appName, 
+      setAppName,
+      theme,
+      setTheme
+    }}>
       {children}
     </NavigationContext.Provider>
   );

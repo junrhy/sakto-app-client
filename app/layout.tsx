@@ -1,15 +1,12 @@
+'use client'
+
 import './globals.css'
-import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import NavigationBar from '@/components/NavigationBar'
-import { NavigationProvider } from '@/contexts/NavigationContext'
+import { NavigationProvider, useNavigation } from '@/contexts/NavigationContext'
+import { useEffect } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Your App Name',
-  description: 'Your app description',
-}
 
 export default function RootLayout({
   children,
@@ -17,14 +14,31 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
+    <NavigationProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </NavigationProvider>
+  )
+}
+
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const { theme } = useNavigation()
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove('light', 'dark')
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      root.classList.add(systemTheme)
+    } else {
+      root.classList.add(theme)
+    }
+  }, [theme])
+
+  return (
     <html lang="en">
       <body className={inter.className}>
-        <NavigationProvider>
-          <NavigationBar />
-          <main className="container mx-auto mt-4">
-            {children}
-          </main>
-        </NavigationProvider>
+        <NavigationBar />
+        {children}
       </body>
     </html>
   )

@@ -2,46 +2,68 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/dropdown-menu";
 import { Menu } from 'lucide-react';
 
 const NavigationBar = () => {
   const pathname = usePathname();
-  const { navigationItems, appName } = useNavigation();
+
+  const navItems = [
+    { name: 'Clinic Management', path: '/clinic-management' },
+    { name: 'Rental Items', path: '/rental-items' },
+    { name: 'Loan Management', path: '/loan-management' },
+    { name: 'Restaurant POS', path: '/restaurant-pos' },
+    { name: 'Settings', path: '/settings' },
+  ];
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
-      <div className="flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold">
-          {appName}
+    <nav className="bg-background text-foreground p-4 shadow-md">
+      <div className="container mx-auto flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold">
+          Multi-Purpose App
         </Link>
+        
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex space-x-4">
+          {navItems.map((item) => (
+            <Link key={item.path} href={item.path}>
+              <Button
+                variant={pathname === item.path ? "default" : "ghost"}
+                className="text-sm"
+              >
+                {item.name}
+              </Button>
+            </Link>
+          ))}
+        </div>
+
+        {/* Mobile Navigation */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild className="md:hidden">
             <Button variant="outline" size="icon">
-              <Menu className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
+              <Menu className="h-[1.2rem] w-[1.2rem]" />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {navigationItems
-              .filter(item => item.enabled)
-              .map((item) => (
-                <DropdownMenuItem key={item.id} asChild>
-                  <Link 
-                    href={item.path} 
-                    className={pathname === item.path ? 'font-bold' : ''}
+            {navItems.map((item) => (
+              <DropdownMenuItem key={item.path} asChild>
+                <Link href={item.path}>
+                  <Button
+                    variant={pathname === item.path ? "default" : "ghost"}
+                    className="w-full justify-start"
                   >
                     {item.name}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
+                  </Button>
+                </Link>
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

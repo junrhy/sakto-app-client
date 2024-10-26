@@ -17,42 +17,22 @@ import {
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigation } from '@/contexts/NavigationContext';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Settings() {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const { navigationItems, updateNavigationItem, currency, setCurrency, appName, setAppName } = useNavigation();
+  const { 
+    navigationItems, 
+    updateNavigationItem, 
+    currency, 
+    setCurrency, 
+    appName, 
+    setAppName,
+    theme,
+    setTheme
+  } = useNavigation();
+  
   const [newAppName, setNewAppName] = useState(appName);
   const [newCurrency, setNewCurrency] = useState(currency);
-
-  const handleDeleteAccount = () => {
-    // Implement account deletion logic here
-    console.log("Account deleted");
-    setIsDeleteDialogOpen(false);
-  };
-
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError("");
-
-    if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match");
-      return;
-    }
-
-    // Implement password change logic here
-    console.log("Password changed");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-  };
-
-  const handleToggleNavigationItem = (id: string, enabled: boolean) => {
-    updateNavigationItem(id, enabled);
-  };
 
   const handleAppNameChange = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +42,10 @@ export default function Settings() {
   const handleCurrencyChange = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrency(newCurrency);
+  };
+
+  const handleToggleNavigationItem = (id: string, enabled: boolean) => {
+    updateNavigationItem(id, enabled);
   };
 
   return (
@@ -111,69 +95,26 @@ export default function Settings() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Change Password</CardTitle>
+              <CardTitle>Theme Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                  />
+              <RadioGroup 
+                value={theme} 
+                onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="light" id="light" />
+                  <Label htmlFor="light">Light</Label>
                 </div>
-                <div>
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                  />
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="dark" id="dark" />
+                  <Label htmlFor="dark">Dark</Label>
                 </div>
-                <div>
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="system" id="system" />
+                  <Label htmlFor="system">System</Label>
                 </div>
-                {passwordError && <p className="text-red-500">{passwordError}</p>}
-                <Button type="submit">Change Password</Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Delete Account</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">Permanently delete your account and all associated data.</p>
-              <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="destructive">Delete Account</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete your account and remove your data from our servers.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-                    <Button variant="destructive" onClick={handleDeleteAccount}>Delete Account</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              </RadioGroup>
             </CardContent>
           </Card>
         </div>
