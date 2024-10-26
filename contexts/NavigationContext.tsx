@@ -1,23 +1,24 @@
 "use client"
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface NavigationItem {
-  id: number;
+type NavigationItem = {
   name: string;
   path: string;
   enabled: boolean;
-}
+};
 
-interface NavigationContextType {
+type NavigationContextType = {
   navigationItems: NavigationItem[];
-  updateNavigationItem: (id: number, enabled: boolean) => void;
-}
+  toggleNavItem: (name: string) => void;
+  currency: string;
+  setCurrency: (currency: string) => void;
+};
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export const useNavigation = () => {
   const context = useContext(NavigationContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useNavigation must be used within a NavigationProvider');
   }
   return context;
@@ -25,33 +26,43 @@ export const useNavigation = () => {
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([
-    { id: 1, name: 'Home', path: '/', enabled: true },
-    { id: 2, name: 'Restaurant POS', path: '/restaurant-pos', enabled: true },
-    { id: 3, name: 'POS', path: '/pos', enabled: true },
-    { id: 4, name: 'Inventory', path: '/inventory', enabled: true },
-    { id: 5, name: 'Rental Items', path: '/rental-items', enabled: true },
-    { id: 6, name: 'Loan Management', path: '/loan-management', enabled: true },
-    { id: 7, name: 'Help', path: '/help', enabled: true },
-    { id: 8, name: 'Rental Properties', path: '/rental-properties', enabled: true },
+    { name: 'Dashboard', path: '/', enabled: true },
+    { name: 'Rental Items', path: '/rental-items', enabled: true },
+    { name: 'Loan Management', path: '/loan-management', enabled: true },
+    { name: 'Restaurant POS', path: '/restaurant-pos', enabled: true },
+    { name: 'Payroll', path: '/payroll', enabled: true },
+    { name: 'Clinic Management', path: '/clinic-management', enabled: true }, // New item
   ]);
+
+  const [currency, setCurrency] = useState('USD');
 
   useEffect(() => {
     const storedItems = localStorage.getItem('navigationItems');
     if (storedItems) {
       setNavigationItems(JSON.parse(storedItems));
     }
+
+    const storedCurrency = localStorage.getItem('appCurrency');
+    if (storedCurrency) {
+      setCurrency(storedCurrency);
+    }
   }, []);
 
-  const updateNavigationItem = (id: number, enabled: boolean) => {
+  const toggleNavItem = (name: string) => {
     const updatedItems = navigationItems.map(item =>
-      item.id === id ? { ...item, enabled } : item
+      item.name === name ? { ...item, enabled: !item.enabled } : item
     );
     setNavigationItems(updatedItems);
     localStorage.setItem('navigationItems', JSON.stringify(updatedItems));
   };
 
+  const updateCurrency = (newCurrency: string) => {
+    setCurrency(newCurrency);
+    localStorage.setItem('appCurrency', newCurrency);
+  };
+
   return (
-    <NavigationContext.Provider value={{ navigationItems, updateNavigationItem }}>
+    <NavigationContext.Provider value={{ navigationItems, toggleNavItem, currency, setCurrency: updateCurrency }}>
       {children}
     </NavigationContext.Provider>
   );

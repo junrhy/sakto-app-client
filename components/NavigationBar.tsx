@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, CreditCard, ShoppingCart, User, HelpCircle, ChevronDown, LogOut, Package, DollarSign, Building } from 'lucide-react';
+import { Menu, X, Home, CreditCard, ShoppingCart, User, HelpCircle, ChevronDown, LogOut, Package, DollarSign, Building, Users, Stethoscope } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,11 +33,23 @@ const NavigationBar = () => {
     console.log('Logging out...');
   };
 
+  const getIcon = (name: string) => {
+    switch (name) {
+      case 'Dashboard': return Home;
+      case 'Rental Items': return Package;
+      case 'Loan Management': return CreditCard;
+      case 'Restaurant POS': return ShoppingCart;
+      case 'Payroll': return Users;
+      case 'Clinic Management': return Stethoscope;
+      default: return null;
+    }
+  };
+
   return (
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-white text-xl font-bold">
-          Your Logo
+          Sakto
         </Link>
         
         {/* Hamburger menu for mobile */}
@@ -49,20 +61,24 @@ const NavigationBar = () => {
 
         {/* Desktop menu */}
         <ul className="hidden md:flex space-x-4 items-center ml-auto">
-          {navigationItems.filter(item => item.enabled).map((item) => (
-            <li key={item.name}>
-              <Link
-                href={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
-                  pathname === item.path
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
-                }`}
-              >
-                {item.name}
-              </Link>
-            </li>
-          ))}
+          {navigationItems.filter(item => item.enabled).map((item) => {
+            const Icon = getIcon(item.name);
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.path}
+                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
+                    pathname === item.path
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+                  }`}
+                >
+                  {Icon && <Icon className="mr-2 h-4 w-4" />}
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
           <li>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -94,21 +110,25 @@ const NavigationBar = () => {
       {isMenuOpen && (
         <div className="md:hidden mt-4">
           <ul className="flex flex-col space-y-2">
-            {navigationItems.filter(item => item.enabled).map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.path}
-                  className={`block px-3 py-2 rounded-md text-base font-medium flex items-center ${
-                    pathname === item.path
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
+            {navigationItems.filter(item => item.enabled).map((item) => {
+              const Icon = getIcon(item.name);
+              return (
+                <li key={item.name}>
+                  <Link
+                    href={item.path}
+                    className={`block px-3 py-2 rounded-md text-base font-medium flex items-center ${
+                      pathname === item.path
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {Icon && <Icon className="mr-2 h-5 w-5" />}
+                    {item.name}
+                  </Link>
+                </li>
+              );
+            })}
             {accountItems.map((item) => (
               <li key={item.name}>
                 <Link
