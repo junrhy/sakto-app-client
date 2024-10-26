@@ -1,12 +1,12 @@
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  // Remove Next-Auth related checks
-  // Add your custom middleware logic here if needed
-  
-  // For now, we'll just pass through all requests
-  return NextResponse.next()
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
+  await supabase.auth.getSession()
+  return res
 }
 
 // Update or remove the config object as needed

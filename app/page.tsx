@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, X, LayoutGrid, Columns, Columns3, ChevronLeft, ChevronRight } from "lucide-react";
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { supabase } from "@/lib/supabase";
 
 type WidgetType = "sales" | "inventory" | "orders";
 
@@ -73,24 +74,60 @@ export default function Home() {
   const [selectedWidgetType, setSelectedWidgetType] = useState<WidgetType | null>(null);
   const [columnCount, setColumnCount] = useState<1 | 2 | 3>(2);
 
-  const addWidget = () => {
+  useEffect(() => {
+    fetchWidgets();
+  }, []);
+
+  const fetchWidgets = async () => {
+    const { data, error } = await supabase
+      .from('widgets')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching widgets:', error);
+    } else {
+      setWidgets(data || []);
+    }
+  };
+
+  const addWidget = async () => {
     if (selectedWidgetType) {
       const newWidget: Widget = {
         id: Date.now(),
         type: selectedWidgetType,
         column: 0,
       };
-      setWidgets([...widgets, newWidget]);
-      setSelectedWidgetType(null);
+
+      const { data, error } = await supabase
+        .from('widgets')
+        .insert(newWidget)
+        .select();
+
+      if (error) {
+        console.error('Error adding widget:', error);
+      } else if (data) {
+        setWidgets([...widgets, data[0]]);
+        setSelectedWidgetType(null);
+      }
     }
   };
 
-  const removeWidget = (id: number) => {
-    setWidgets(widgets.filter(widget => widget.id !== id));
+  const removeWidget = async (id: number) => {
+    const { error } = await supabase
+      .from('widgets')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error removing widget:', error);
+    } else {
+      setWidgets(widgets.filter(widget => widget.id !== id));
+    }
   };
 
-  const moveWidget = (id: number, direction: 'left' | 'right') => {
-    setWidgets(widgets.map(widget => {
+  const moveWidget = async (id: number, direction: 'left' | 'right') => {
+    const updatedWidgets = widgets.map(widget => {
       if (widget.id === id) {
         const newColumn = direction === 'left' 
           ? Math.max(0, widget.column - 1)
@@ -98,7 +135,21 @@ export default function Home() {
         return { ...widget, column: newColumn };
       }
       return widget;
-    }));
+    });
+
+    const updatedWidget = updatedWidgets.find(w => w.id === id);
+    if (updatedWidget) {
+      const { error } = await supabase
+        .from('widgets')
+        .update({ column: updatedWidget.column })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error moving widget:', error);
+      } else {
+        setWidgets(updatedWidgets);
+      }
+    }
   };
 
   const getColumnClass = () => {
