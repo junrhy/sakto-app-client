@@ -45,7 +45,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     { id: '3', name: 'Rental Items', path: '/rental-items', enabled: true },
     { id: '4', name: 'Loan Management', path: '/loan-management', enabled: true },
     { id: '5', name: 'Restaurant POS', path: '/restaurant-pos', enabled: true },
-    { id: '6', name: 'Settings', path: '/settings', enabled: true },
+    { id: '6', name: 'Warehouse & Distribution', path: '/warehouse-distribution', enabled: true },
+    { id: '7', name: 'Trucking Business', path: '/trucking-business', enabled: true },
+    { id: '8', name: 'Settings', path: '/settings', enabled: true },
   ]);
   const [color, setColor] = useState<Color>('zinc');
 
