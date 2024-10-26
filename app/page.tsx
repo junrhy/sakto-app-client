@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { supabase } from "@/lib/supabase";
+import { Login } from "@/components/Login";
 
 type WidgetType = "sales" | "inventory" | "orders";
 
@@ -73,10 +74,34 @@ export default function Home() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [selectedWidgetType, setSelectedWidgetType] = useState<WidgetType | null>(null);
   const [columnCount, setColumnCount] = useState<1 | 2 | 3>(2);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchWidgets();
+    checkUser();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchWidgets();
+    }
+  }, [user]);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+    setLoading(false);
+  };
+
+  const handleLogin = () => {
+    checkUser();
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setWidgets([]);
+  };
 
   const fetchWidgets = async () => {
     const { data, error } = await supabase
@@ -165,9 +190,31 @@ export default function Home() {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-8">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Log in to Your Dashboard</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Login onLogin={handleLogin} />
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center p-8">
-      <h1 className="text-3xl font-bold mb-8">Welcome to Your Dashboard</h1>
+      <div className="w-full max-w-7xl flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Welcome to Your Dashboard</h1>
+        <Button onClick={handleLogout}>Log out</Button>
+      </div>
       
       <div className="w-full max-w-7xl mb-8">
         <div className="flex space-x-4 mb-4">
