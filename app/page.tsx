@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { supabase } from "@/lib/supabase";
-import { Login } from "@/components/Login";
+import { useNavigate } from 'react-router-dom';
 
 type WidgetType = "sales" | "inventory" | "orders";
 
@@ -76,26 +76,28 @@ export default function Home() {
   const [columnCount, setColumnCount] = useState<1 | 2 | 3>(2);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   checkUser();
+  // }, []);
 
   useEffect(() => {
-    checkUser();
+    // if (user) {
+      fetchWidgets();
+      setLoading(false);
+    // }
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      fetchWidgets();
-    }
-  }, [user]);
+  // const checkUser = async () => {
+  //   const { data: { user } } = await supabase.auth.getUser();
+  //   setUser(user);
+  //   setLoading(false);
+  // };
 
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-    setLoading(false);
-  };
-
-  const handleLogin = () => {
-    checkUser();
-  };
+  // const handleLogin = () => {
+  //   checkUser();
+  // };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -202,12 +204,16 @@ export default function Home() {
             <CardTitle>Log in to Your Dashboard</CardTitle>
           </CardHeader>
           <CardContent>
-            <Login onLogin={handleLogin} />
+
           </CardContent>
         </Card>
       </main>
     );
   }
+
+  useEffect(() => {
+    navigate('/dashboard');
+  }, [navigate]);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8">

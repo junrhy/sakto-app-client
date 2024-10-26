@@ -1,13 +1,13 @@
 'use client'
 
 import './globals.css'
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { NavigationProvider } from '@/contexts/NavigationContext'
-import dynamic from 'next/dynamic'
+import { RouterProvider } from 'react-router-dom'
+import router from './router'
 
 const inter = Inter({ subsets: ['latin'] })
-
-const LayoutContent = dynamic(() => import('./LayoutContent'), { ssr: false })
 
 export default function RootLayout({
   children,
@@ -15,10 +15,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
         <NavigationProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <RouterProvider router={router} />
         </NavigationProvider>
       </body>
     </html>

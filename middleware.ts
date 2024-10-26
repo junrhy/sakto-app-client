@@ -1,15 +1,27 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
-  await supabase.auth.getSession()
-  return res
+export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
+
+  const isPublicPath = path === '/login'
+
+  const token = request.cookies.get('token')?.value || ''
+
+  if (token) {
+    return NextResponse.redirect(new URL('/', request.nextUrl))
+  }
+
+  if (!isPublicPath && !token) {
+    return NextResponse.redirect(new URL('/login', request.nextUrl))
+  }
 }
 
-// Update or remove the config object as needed
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/',
+    '/login',
+    '/dashboard',
+    '/clinic-management',
+  ]
 }
